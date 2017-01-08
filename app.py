@@ -25,27 +25,27 @@ XMPP_JID = os.environ.get('XMPP_JID')
 XMPP_PASSWORD = os.environ.get('XMPP_PASSWORD')
 text = ""
 
-# def build_test_payload():
-#     test_message = [{
-#         "fallback" : "test message: ",
-#         "pretext" : "test message: ",
-#         "color" : "#D00000",
-#         "fields" : [{
-#             "title" : "This is a test.",
-#             "value" : "This is a test message to declare the app is now running.",
-#             "short" : false
-#         }]
-#     }]
+def build_test_payload():
+    test_message = [{
+        "fallback" : "test message: ",
+        "pretext" : "test message: ",
+        "color" : "#D00000",
+        "fields" : [{
+            "title" : "This is a test.",
+            "value" : "This is a test message to declare the app is now running.",
+            "short" : false
+        }]
+    }]
     
-#     attachment = json.dumps(test_message)
-#     payload = {
-#         'token' : SLACK_TOKEN,
-#         'channel' : SLACK_CHANNEL,
-#         'attachments' : attachment,
-#         'text' : text
-#     }
+    attachment = json.dumps(test_message)
+    payload = {
+        'token' : SLACK_TOKEN,
+        'channel' : SLACK_CHANNEL,
+        'attachments' : attachment,
+        'text' : text
+    }
 
-#     return payload
+    return payload
 
 class EchoBot(sleekxmpp.ClientXMPP):
     def __init__(self, jid, password):
@@ -57,8 +57,8 @@ class EchoBot(sleekxmpp.ClientXMPP):
     def start(self, start):
         self.send_presence()
         self.get_roster()
-        # test_payload = build_test_payload()
-        # r.requests.post(url, data=test_payload)
+        test_payload = build_test_payload()
+        r.requests.post(url, data=test_payload)
 
     def message(self, msg):
         print "Type: %s" % msg['type']
