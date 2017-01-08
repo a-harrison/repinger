@@ -31,9 +31,8 @@ def build_test_payload():
         "pretext" : "test message: ",
         "color" : "#D00000",
         "fields" : [{
-            "title" : "This is a test.",
-            "value" : "This is a test message to declare the app is now running.",
-            "short" : false
+            "title" : "REPINGER Startup.",
+            "value" : "The repinger app has started."
         }]
     }]
     
@@ -50,15 +49,15 @@ def build_test_payload():
 class EchoBot(sleekxmpp.ClientXMPP):
     def __init__(self, jid, password):
         super(EchoBot, self).__init__(jid, password)
-
         self.add_event_handler('session_start', self.start)
         self.add_event_handler('message', self.message)
     
     def start(self, start):
+        test_payload = build_test_payload()
+        r = requests.post(slack_url, data=test_payload)
+
         self.send_presence()
         self.get_roster()
-        test_payload = build_test_payload()
-        r.requests.post(url, data=test_payload)
 
     def message(self, msg):
         print "Type: %s" % msg['type']
