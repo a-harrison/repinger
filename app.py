@@ -40,7 +40,7 @@ def build_test_payload():
     test_payload = {
         'token' : SLACK_TOKEN,
         'channel' : SLACK_CHANNEL,
-        'attachments' : attachment,
+        'attachments' : test_attachment,
         'text' : text
     }
 
