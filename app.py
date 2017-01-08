@@ -25,27 +25,27 @@ XMPP_JID = os.environ.get('XMPP_JID')
 XMPP_PASSWORD = os.environ.get('XMPP_PASSWORD')
 text = ""
 
-def build_test_payload():
-    test_message = [{
-        "fallback" : "test message: ",
-        "pretext" : "test message: ",
-        "color" : "#D00000",
-        "fields" : [{
-            "title" : "This is a test.",
-            "value" : "This is a test message to declare the app is now running.",
-            "short" : false
-        }]
-    }]
+# def build_test_payload():
+#     test_message = [{
+#         "fallback" : "test message: ",
+#         "pretext" : "test message: ",
+#         "color" : "#D00000",
+#         "fields" : [{
+#             "title" : "This is a test.",
+#             "value" : "This is a test message to declare the app is now running.",
+#             "short" : false
+#         }]
+#     }]
     
-    attachment = json.dumps(test_message)
-    payload = {
-        'token' : SLACK_TOKEN,
-        'channel' : SLACK_CHANNEL,
-        'attachments' : attachment,
-        'text' : text
-    }
+#     attachment = json.dumps(test_message)
+#     payload = {
+#         'token' : SLACK_TOKEN,
+#         'channel' : SLACK_CHANNEL,
+#         'attachments' : attachment,
+#         'text' : text
+#     }
 
-    return payload
+#     return payload
 
 class EchoBot(sleekxmpp.ClientXMPP):
     def __init__(self, jid, password):
@@ -116,13 +116,17 @@ if __name__ == '__main__':
     logging.basicConfig(level=opts.loglevel, format='%(levelname)-8s %(message)s')
 
     # Here we will instantiate our echo bot
-    xmpp = EchoBot(XMPP_JID, XMPP_PASSWORD)
-    xmpp.register_plugin('xep_0030') # Service Discovery
-    xmpp.register_plugin('xep_0199') # Pings
-    
-    # Finally, we connect the bott and start listening for messages
-    if xmpp.connect():
-        print "Connected!"
-        xmpp.process(block=True)
+    if (XMPP_JID is None or XMPP_PASSWORD is None):
+        print "Connection values not defined."
     else:
-        print('Unable to connect')
+        xmpp = EchoBot(XMPP_JID, XMPP_PASSWORD)
+        xmpp.register_plugin('xep_0030') # Service Discovery
+        xmpp.register_plugin('xep_0199') # Pings
+
+        # Finally, we connect the bott and start listening for messages
+        print "Connecting."
+        if xmpp.connect():
+            print "Connected!"
+            xmpp.process(block=True)
+        else:
+            print('Unable to connect')
