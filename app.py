@@ -36,15 +36,15 @@ def build_test_payload():
         }]
     }]
     
-    attachment = json.dumps(test_message)
-    payload = {
+    test_attachment = json.dumps(test_message)
+    test_payload = {
         'token' : SLACK_TOKEN,
         'channel' : SLACK_CHANNEL,
         'attachments' : attachment,
         'text' : text
     }
 
-    return payload
+    return test_payload
 
 class EchoBot(sleekxmpp.ClientXMPP):
     def __init__(self, jid, password):
