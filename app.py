@@ -25,17 +25,40 @@ XMPP_JID = os.environ.get('XMPP_JID')
 XMPP_PASSWORD = os.environ.get('XMPP_PASSWORD')
 text = ""
 
+def build_test_payload():
+    test_message = [{
+        "fallback" : "test message: ",
+        "pretext" : "test message: ",
+        "color" : "#D00000",
+        "fields" : [{
+            "title" : "This is a test.",
+            "value" : "This is a test message to declare the app is now running.",
+            "short" : false
+        }]
+    }]
+    
+    attachment = json.dumps(test_message)
+    payload = {
+        'token' : SLACK_TOKEN,
+        'channel' : SLACK_CHANNEL,
+        'attachments' : attachment,
+        'text' : text
+    }
+
+    return payload
+
 class EchoBot(sleekxmpp.ClientXMPP):
     def __init__(self, jid, password):
         super(EchoBot, self).__init__(jid, password)
 
-    self.add_event_handler('session_start', self.start)
-    self.add_event_handler('message', self.message)
-
+        self.add_event_handler('session_start', self.start)
+        self.add_event_handler('message', self.message)
+    
     def start(self, start):
         self.send_presence()
         self.get_roster()
-        
+        # test_payload = build_test_payload()
+        # r.requests.post(url, data=test_payload)
 
     def message(self, msg):
         print "Type: %s" % msg['type']
@@ -49,7 +72,7 @@ class EchoBot(sleekxmpp.ClientXMPP):
             "color" : "#D00000",
             "fields" : [{
                 "title" : "",
-                "value" : msg['body']
+                "value" : msg['body'],
                 "short" : false
                 }]
         }]
@@ -67,7 +90,6 @@ class EchoBot(sleekxmpp.ClientXMPP):
         r.requests.post(url, data=payload)
         if(r.status_code != 200):
             print "ERROR sending ping to Slack!"
-            
                 
 if __name__ == '__main__':
 
@@ -100,6 +122,7 @@ if __name__ == '__main__':
     
     # Finally, we connect the bott and start listening for messages
     if xmpp.connect():
+        print "Connected!"
         xmpp.process(block=True)
     else:
         print('Unable to connect')
