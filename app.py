@@ -9,7 +9,7 @@ import os
 
 # Dependencies
 import sleekxmpp
-import requests
+from slack_message_client import SlackMessageClient
 
 
 if sys.version_info < (3, 0):
@@ -23,34 +23,18 @@ SLACK_CHANNEL = os.environ.get('SLACK_CHANNEL')
 
 XMPP_JID = os.environ.get('XMPP_JID')
 XMPP_PASSWORD = os.environ.get('XMPP_PASSWORD')
-text = ""
 
-def build_test_payload():
-    test_message = [{
-        "fallback" : "test message: ",
-        "pretext" : "test message: ",
-        "color" : "#D00000",
-        "fields" : [{
-            "title" : "REPINGER Startup.",
-            "value" : "The repinger app has started."
-        }]
-    }]
-    
-    test_attachment = json.dumps(test_message)
-    test_payload = {
-        'token' : SLACK_TOKEN,
-        'channel' : SLACK_CHANNEL,
-        'attachments' : test_attachment,
-        'text' : text
-    }
-
-    return test_payload
 
 class EchoBot(sleekxmpp.ClientXMPP):
     def __init__(self, jid, password):
         super(EchoBot, self).__init__(jid, password)
         self.add_event_handler('session_start', self.start)
         self.add_event_handler('message', self.message)
+        self.slack_client = SlackMessageClient(
+            slack_url,
+            SLACK_TOKEN,
+            SLACK_CHANNEL
+            )
     
     def start(self, start):
         test_payload = build_test_payload()
@@ -65,28 +49,16 @@ class EchoBot(sleekxmpp.ClientXMPP):
         print "To: %s" % msg['to']
         print "Body: %s" % msg['body']
         
-        message = [{
-            "fallback" : "pleaseignore.com: ",
-            "pretext" : "pleaseignore.com: ",
-            "color" : "#D00000",
-            "fields" : [{
-                "title" : "",
-                "value" : msg['body'],
-                "short" : false
-                }]
-        }]
-        
-        attachment = json.dumps(message)
-        
-        payload = {
-            'token' : SLACK_TOKEN,
-            'channel' : SLACK_CHANNEL,
-            'attachments' : attachment,
-            'text' : text
-        }
+        attachment = slack_client.build_attachment(
+            "pleaseignore.com",
+            "#D00000",
+            "",
+            msg['body']
+            )
+        payload = slack_client.build_payload("", attachment)
 
         # Post Slack Message
-        r.requests.post(url, data=payload)
+        slack_client.send_message(payload)
         if(r.status_code != 200):
             print "ERROR sending ping to Slack!"
                 
