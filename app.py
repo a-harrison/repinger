@@ -37,8 +37,8 @@ class EchoBot(sleekxmpp.ClientXMPP):
             )
     
     def start(self, start):
-        test_payload = build_test_payload()
-        r = requests.post(slack_url, data=test_payload)
+        startup_payload = slack_client.build_payload("Listener started.", None)
+        slack_client.send_message(startup_payload)
 
         self.send_presence()
         self.get_roster()
