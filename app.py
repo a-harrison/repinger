@@ -37,8 +37,8 @@ class EchoBot(sleekxmpp.ClientXMPP):
             )
     
     def start(self, start):
-        startup_payload = slack_client.build_payload("Listener started.", None)
-        slack_client.send_message(startup_payload)
+        startup_payload = self.slack_client.build_payload("Listener started.", None)
+        self.slack_client.send_message(startup_payload)
 
         self.send_presence()
         self.get_roster()
@@ -49,16 +49,16 @@ class EchoBot(sleekxmpp.ClientXMPP):
         print "To: %s" % msg['to']
         print "Body: %s" % msg['body']
         
-        attachment = slack_client.build_attachment(
+        attachment = self.slack_client.build_attachment(
             "pleaseignore.com",
             "#D00000",
             "",
             msg['body']
             )
-        payload = slack_client.build_payload("", attachment)
+        payload = self.slack_client.build_payload("", attachment)
 
         # Post Slack Message
-        slack_client.send_message(payload)
+        self.slack_client.send_message(payload)
         if(r.status_code != 200):
             print "ERROR sending ping to Slack!"
                 
