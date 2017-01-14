@@ -6,6 +6,7 @@ import getpass
 from optparse import OptionParser
 import json
 import os 
+import ConfigParser
 
 # Dependencies
 import sleekxmpp
@@ -16,15 +17,29 @@ if sys.version_info < (3, 0):
     reload(sys)
     sys.setdefaultencoding('utf8')
 
+config = ConfigParser.ConfigParser();
+config.read('./app.config');
+    
 slack_url= "https://slack.com/api/chat.postMessage"
 
 SLACK_TOKEN = os.environ.get('SLACK_TOKEN')
 SLACK_CHANNEL = os.environ.get('SLACK_CHANNEL')
-
 XMPP_JID = os.environ.get('XMPP_JID')
 XMPP_PASSWORD = os.environ.get('XMPP_PASSWORD')
 
+if SLACK_TOKEN is None:
+    SLACK_TOKEN = config.get('Configuration', 'SLACK_TOKEN')
 
+if SLACK_CHANNEL is None:
+    SLACK_CHANNEL = config.get('Configuration', 'SLACK_CHANNEL')
+
+if XMPP_JID is None:
+    XMPP_JID = config.get('Configuration', 'XMPP_JID')
+
+if XMPP_PASSWORD is None:
+    XMPP_PASSWORD = config.get('Configuration', 'XMPP_PASSWORD')
+
+    
 class EchoBot(sleekxmpp.ClientXMPP):
     def __init__(self, jid, password):
         super(EchoBot, self).__init__(jid, password)

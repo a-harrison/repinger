@@ -1,4 +1,7 @@
 *~
-repinger
+repinger_venv
 .env
 test.py
+app.config
+*.pyc
+*.log
