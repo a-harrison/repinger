@@ -74,9 +74,7 @@ class EchoBot(sleekxmpp.ClientXMPP):
 
         # Post Slack Message
         self.slack_client.send_message(payload)
-        if(r.status_code != 200):
-            print "ERROR sending ping to Slack!"
-                
+                       
 if __name__ == '__main__':
 
     # Here we will configure and read command line options
