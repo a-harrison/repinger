@@ -5,13 +5,10 @@ import logging
 import getpass
 from optparse import OptionParser
 import json
-import os 
+import os
 import ConfigParser
-
-# Dependencies
-import sleekxmpp
 from slack_message_client import SlackMessageClient
-
+from xmpp_listener import XmppListener
 
 if sys.version_info < (3, 0):
     reload(sys)
@@ -19,62 +16,15 @@ if sys.version_info < (3, 0):
 
 config = ConfigParser.ConfigParser();
 config.read('./app.config');
-    
-slack_url= "https://slack.com/api/chat.postMessage"
 
-SLACK_TOKEN = os.environ.get('SLACK_TOKEN')
-SLACK_CHANNEL = os.environ.get('SLACK_CHANNEL')
-XMPP_JID = os.environ.get('XMPP_JID')
-XMPP_PASSWORD = os.environ.get('XMPP_PASSWORD')
+SLACK_ENDPOINT_URL= "https://slack.com/api/chat.postMessage"
 
-if SLACK_TOKEN is None:
-    SLACK_TOKEN = config.get('Configuration', 'SLACK_TOKEN')
+# Read configuration variables
+SLACK_TOKEN = config.get('Configuration', 'SLACK_TOKEN')
+SLACK_CHANNEL = config.get('Configuration', 'SLACK_CHANNEL')
+XMPP_JID = config.get('Configuration', 'XMPP_JID')
+XMPP_PASSWORD = config.get('Configuration', 'XMPP_PASSWORD')
 
-if SLACK_CHANNEL is None:
-    SLACK_CHANNEL = config.get('Configuration', 'SLACK_CHANNEL')
-
-if XMPP_JID is None:
-    XMPP_JID = config.get('Configuration', 'XMPP_JID')
-
-if XMPP_PASSWORD is None:
-    XMPP_PASSWORD = config.get('Configuration', 'XMPP_PASSWORD')
-
-    
-class EchoBot(sleekxmpp.ClientXMPP):
-    def __init__(self, jid, password):
-        super(EchoBot, self).__init__(jid, password)
-        self.add_event_handler('session_start', self.start)
-        self.add_event_handler('message', self.message)
-        self.slack_client = SlackMessageClient(
-            slack_url,
-            SLACK_TOKEN,
-            SLACK_CHANNEL
-            )
-    
-    def start(self, start):
-        startup_payload = self.slack_client.build_payload("Listener started.", None)
-        self.slack_client.send_message(startup_payload)
-
-        self.send_presence()
-        self.get_roster()
-
-    def message(self, msg):
-        print "Type: %s" % msg['type']
-        print "From: %s" % msg['from']
-        print "To: %s" % msg['to']
-        print "Body: %s" % msg['body']
-        
-        attachment = self.slack_client.build_attachment(
-            "pleaseignore.com",
-            "#D00000",
-            "",
-            msg['body']
-            )
-        payload = self.slack_client.build_payload("", attachment)
-
-        # Post Slack Message
-        self.slack_client.send_message(payload)
-                       
 if __name__ == '__main__':
 
     # Here we will configure and read command line options
@@ -86,24 +36,27 @@ if __name__ == '__main__':
     optp.add_option("-j", "--jid", dest="jid", help="JID to use")
     optp.add_option("-p", "--password", dest="password", help="password to use")
     opts, args = optp.parse_args()
-    
-    # if opts.jid is None:
-    #     opts.jid = raw_input("Username: ")
-    # if opts.password is None:
-    #     opts.password = getpass.getpass("Password: ")
 
+    # Read from command line arguments if present.
     if opts.jid is not None:
         XMPP_JID = opts.jid
     if opts.password is not None:
-        XMPP_PASSWORD = opts.password    
-    
+        XMPP_PASSWORD = opts.password
+
     logging.basicConfig(level=opts.loglevel, format='%(levelname)-8s %(message)s')
+
+    # Setup slack integration
+    messaging_client = SlackMessageClient(
+        SLACK_ENDPOINT_URL,
+        SLACK_TOKEN,
+        SLACK_CHANNEL
+       )
 
     # Here we will instantiate our echo bot
     if (XMPP_JID is None or XMPP_PASSWORD is None):
         print "Connection values not defined."
     else:
-        xmpp = EchoBot(XMPP_JID, XMPP_PASSWORD)
+        xmpp = XmppListener(XMPP_JID, XMPP_PASSWORD, messaging_client)
         xmpp.register_plugin('xep_0030') # Service Discovery
         xmpp.register_plugin('xep_0199') # Pings
 
