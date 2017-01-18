@@ -6,7 +6,7 @@ Stripped down extention of ClientXMPP.
 '''
 class XmppListener(sleekxmpp.ClientXMPP):
     def __init__(self, jid, password, messaging_client):
-        super(EchoBot, self).__init__(jid, password)
+        super(XmppListener, self).__init__(jid, password)
         self.add_event_handler('session_start', self.start)
         self.add_event_handler('message', self.message)
         self.slack_client = messaging_client
